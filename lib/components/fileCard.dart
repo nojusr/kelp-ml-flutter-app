@@ -1,33 +1,45 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:meme_machine/util/selectionManager.dart';
+
 import '../fileViewPage.dart';
+import '../util/circularRevealRoute.dart';
 import '../util/fileTypePicker.dart';
 import '../util/kelpApi.dart';
-import '../util/circularRevealRoute.dart';
 
-class fileCard extends StatelessWidget {
+class fileCard extends StatefulWidget {
 
   const fileCard({
     Key key,
     this.bg = const Color(0xFFFF0000),
+    this.selectedBg = const Color(0xFFFF5555),
     this.fg = const Color(0xFFFFFFFF),
+    this.selectionManager,
     this.item = const FileItem(id: "null", filename: "null", filetype: "null"),
   }) : super(key: key);
 
+  final SelectionManager selectionManager;
   final FileItem item;
   final Color bg;
+  final Color selectedBg;
   final Color fg;
 
   @override
-  Widget build(BuildContext context) {
+  _fileCardState createState() => _fileCardState();
+}
 
+class _fileCardState extends State<fileCard> {
+  @override
+  Widget build(BuildContext context) {
     // determine icon for filetype
 
-    Widget fileIcon = fileTypePicker.generateIcon(this.item.filetype, this.fg);
+    //Widget fileIcon = fileTypePicker.generateIcon(this.item.filetype, this.fg);
 
     Widget item;
 
-    String err = " ";
+    bool isSelected = widget.selectionManager.checkIfSelected(
+        this.widget.item.id);
+
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -37,52 +49,61 @@ class fileCard extends StatelessWidget {
             margin: EdgeInsets.all(3),
 
             color: Colors.transparent,
-            child: Container(
+            child: AnimatedContainer(
+              curve: Curves.easeInOut,
+              duration: Duration(milliseconds: 150),
               decoration: BoxDecoration(
-                color: this.bg,
+                color: isSelected ? this.widget.selectedBg : this.widget.bg,
                 borderRadius: BorderRadius.all(Radius.circular(10)),
               ),
               padding: EdgeInsets.only(left: 10, right: 10, top:20, bottom: 20),
 
               child: Center(
-                  child: Row(
-                    children: <Widget>[
-                      Container(
-                          margin: EdgeInsets.only(right: 5),
-                          child: Hero(
-                            tag: this.item.id+"_icon",
-                            child: fileTypePicker.generateIcon(this.item.filetype, this.fg),
-                          ),
+                child: Row(
+                  children: <Widget>[
+                    Container(
+                      margin: EdgeInsets.only(right: 5),
+                      child: Hero(
+                        tag: this.widget.item.id + "_icon",
+                        child: fileTypePicker.generateIcon(this.widget.item
+                            .filetype, this.widget.fg),
                       ),
+                    ),
 
-                      Hero(
-                        tag: this.item.id+"_filename",
-                        child: Text(
-                          this.item.filename,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.body1,
+                    Hero(
+                      tag: this.widget.item.id + "_filename",
+                      child: Text(
+                        this.widget.item.filename,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme
+                            .of(context)
+                            .textTheme
+                            .body1,
+                      ),
+                    ),
+
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: Hero(
+                          tag: this.widget.item.id + "_link",
+                          child: Text(
+                            this.widget.item.id + "." +
+                                this.widget.item.filetype,
+                            style: Theme
+                                .of(context)
+                                .textTheme
+                                .body1,
+                          ),
                         ),
                       ),
-
-                      Expanded(
-                        child: Align(
-                          alignment: Alignment.centerRight,
-                          child: Hero(
-                            tag: this.item.id+"_link",
-                            child: Text(
-                              this.item.id+"."+this.item.filetype,
-                              style: Theme.of(context).textTheme.body1,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
+                  ],
                 ),
               ),
             ),
           );
-
         } else {
           item = Container(
             color: Colors.transparent,
@@ -90,80 +111,83 @@ class fileCard extends StatelessWidget {
             child: Container(
 
               decoration: BoxDecoration(
-                    color: this.bg,
-                    borderRadius: BorderRadius.all(Radius.circular(10)),),
+                color: isSelected ? this.widget.selectedBg : this.widget.bg,
+                borderRadius: BorderRadius.all(Radius.circular(10)),
+              ),
 
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: <Widget>[
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: <Widget>[
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: <Widget>[
 
-                        Container(
-                          constraints: BoxConstraints(maxWidth: 156),
-                          margin: EdgeInsets.only(top:10, left: 8),
-                          child: Row(
-                            children: <Widget>[
-                                //fit: FlexFit.loose,
-                                Expanded(
-                                  child: Hero(
-                                    tag: this.item.id+"_filename",
-                                    child: Text(
-                                      this.item.filename,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: Theme.of(context).textTheme.body1,
-                                    ),
-                                  ),
-                                ),
-
-
-
-                            ],
-                          ),
-                        ),
-
-
-
-                        Expanded(
-                          child: Align(
-                            alignment: Alignment.bottomLeft,
-                            child: Container(
-                              margin: EdgeInsets.only(left: 8, bottom: 10),
+                      Container(
+                        constraints: BoxConstraints(maxWidth: 156),
+                        margin: EdgeInsets.only(top: 10, left: 8),
+                        child: Row(
+                          children: <Widget>[
+                            //fit: FlexFit.loose,
+                            Expanded(
                               child: Hero(
-                                tag: this.item.id+"_link",
+                                tag: this.widget.item.id + "_filename",
                                 child: Text(
-                                  this.item.id+"."+this.item.filetype,
-                                  style: Theme.of(context).textTheme.body1,
+                                  this.widget.item.filename,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: Theme
+                                      .of(context)
+                                      .textTheme
+                                      .body1,
                                 ),
                               ),
                             ),
-
-                          ),
+                          ],
                         ),
-                      ],
-                    ),
-
-                    Expanded(
-                      child: Align(
-                        alignment: Alignment.centerRight,
-                        child:
-                        Container(
-                          margin: EdgeInsets.only(right: 10),
-                          child: Hero(
-                            tag: this.item.id+"_icon",
-                            child: fileTypePicker.generateIcon(this.item.filetype, this.fg),
-                          ),
-                        ),
-
                       ),
-                    )
 
-                  ],
-                ),
 
+                      Expanded(
+                        child: Align(
+                          alignment: Alignment.bottomLeft,
+                          child: Container(
+                            margin: EdgeInsets.only(left: 8, bottom: 10),
+                            child: Hero(
+                              tag: this.widget.item.id + "_link",
+                              child: Text(
+                                this.widget.item.id + "." +
+                                    this.widget.item.filetype,
+                                style: Theme
+                                    .of(context)
+                                    .textTheme
+                                    .body1,
+                              ),
+                            ),
+                          ),
+
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: Container(
+                        margin: EdgeInsets.only(right: 10),
+                        child: Hero(
+                          tag: this.widget.item.id + "_icon",
+                          child: fileTypePicker.generateIcon(
+                              this.widget.item.filetype, this.widget.fg),
+                        ),
+                      ),
+
+                    ),
+                  )
+
+                ],
+              ),
 
 
             ),
@@ -171,24 +195,47 @@ class fileCard extends StatelessWidget {
         }
 
         return GestureDetector(
+
+          onLongPress: () {
+            if (this.widget.selectionManager.checkIfSelected(
+                this.widget.item.id) == false) {
+              this.widget.selectionManager.addToSelection(this.widget.item.id);
+            } else {
+              this.widget.selectionManager.removeFromSelection(
+                  this.widget.item.id);
+            }
+            setState(() {});
+          },
+
           onTapUp: (TapUpDetails details) {
-            Navigator.push(
-              context,
-              RevealRoute(
-                transitionDuration: Duration(milliseconds: 300),
-                page: fileViewPage(
-                  item: this.item,
-                  fg: this.fg,
+            if (this.widget.selectionManager.selectionActive) {
+              if (this.widget.selectionManager.checkIfSelected(
+                  this.widget.item.id) == false) {
+                this.widget.selectionManager.addToSelection(
+                    this.widget.item.id);
+              } else {
+                this.widget.selectionManager.removeFromSelection(
+                    this.widget.item.id);
+              }
+              setState(() {});
+            } else {
+              Navigator.push(
+                context,
+                RevealRoute(
+                  transitionDuration: Duration(milliseconds: 300),
+                  page: fileViewPage(
+                    item: this.widget.item,
+                    fg: this.widget.fg,
+                  ),
+                  maxRadius: 1200,
+                  centerOffset: details.globalPosition,
                 ),
-                maxRadius: 1200,
-                centerOffset: details.globalPosition,
-              ),
-            );
+              );
+            }
           },
           child: item,
         );
       },
     );
-
   }
 }

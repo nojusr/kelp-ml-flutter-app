@@ -1,9 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:meme_machine/main.dart';
-import 'dart:developer' as developer;
-import './util/kelpApi.dart';
 import 'package:flutter/rendering.dart';
+import 'package:meme_machine/main.dart';
+
+import './util/kelpApi.dart';
 
 class loginPage extends StatefulWidget {
 
@@ -114,9 +114,7 @@ class loginPageState extends State<loginPage> {
 
                               try {
                                 await kelpApi.sendLogin(username, password);
-                              } on String catch (error) {
-                                final snackbar = SnackBar(content: Text(error.toString()),);
-                                Scaffold.of(context).showSnackBar(snackbar);
+                              } on String catch () {
                                 return;
                               }
 

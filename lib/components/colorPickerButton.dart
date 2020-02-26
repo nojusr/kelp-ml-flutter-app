@@ -59,7 +59,7 @@ class colorPickerButton extends StatelessWidget {
                             pickerAreaHeightPercent: 0.7,
                             enableAlpha: false,
                             displayThumbColor: true,
-                            enableLabel: true,
+                            //enableLabel: true,
                             paletteType: PaletteType.hsv,
                           ),
                         ),

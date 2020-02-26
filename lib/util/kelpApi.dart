@@ -1,15 +1,17 @@
+import 'dart:convert';
+
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
+import 'package:http/http.dart' as http;
+import 'package:photo_view/photo_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:http/http.dart' as http;
-import '../components/kelpVideoPlayer.dart';
-import '../components/kelpLoadingIndicator.dart';
-import '../components/kelpAudioPlayer.dart';
-import 'package:photo_view/photo_view.dart';
-import 'package:flutter/material.dart';
-import 'dart:convert';
+
 import './fileTypePicker.dart';
+import '../components/kelpAudioPlayer.dart';
+import '../components/kelpLoadingIndicator.dart';
+import '../components/kelpVideoPlayer.dart';
 
 
 // MODELS FOR DATA REPRESENTATION
@@ -232,6 +234,32 @@ class kelpApi {
     }
 
     await prefs.setString("api_key", jsonResponse["api_key"]);
+
+    return;
+  }
+
+  static Future deleteFile(String fileId) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String api_key = prefs.getString("api_key");
+
+    var map = new Map<String, dynamic>();
+
+    map["api_key"] = api_key;
+    map["file_id"] = fileId;
+
+    final response = await http.post(
+        rootRoute + "/api/upload/delete", body: map);
+
+    if (response.statusCode != 200) {
+      throw Exception(
+          "Failed to delete file (status code: ${response.statusCode})");
+    }
+
+    final jsonResponse = json.decode(response.body);
+
+    if (jsonResponse["success"] == 'false') {
+      throw Exception("Failed to get successful response");
+    }
 
     return;
   }

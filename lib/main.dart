@@ -1,15 +1,17 @@
+import 'dart:developer' as developer;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:meme_machine/components/kelpLoadingIndicator.dart';
-import './util/themeGenerator.dart';
-import './util/kelpApi.dart';
+
 import './components/kelpTabBar.dart';
 import './components/mainMenu.dart';
+import './util/kelpApi.dart';
+import './util/themeGenerator.dart';
 import 'filePage.dart';
-import 'pastePage.dart';
 import 'loginPage.dart';
-import 'dart:developer' as developer;
+import 'pastePage.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,18 +22,12 @@ class rootApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-
-
-
-
-
     themeGenerator themeGen = themeGenerator();
 
     developer.log("returning FutureBuilder in rootApp");
     return FutureBuilder(
       future: themeGen.generateThemeData(context),
       builder: (context, snapshot) {
-
         ThemeData mainThemeData = snapshot.data;
 
         Future loginChk = kelpApi.checkIfLoggedIn();
@@ -53,14 +49,18 @@ class rootApp extends StatelessWidget {
                 );
               }
             } else {
-              return Center(child: kelpLoadingIndicator(),);
+              return MaterialApp(
+                title: 'kelp\'s place',
+                theme: mainThemeData,
+                home: Scaffold(
+                  body: Center(child: kelpLoadingIndicator(),),
+                ),
+              );
             }
           },
         );
       },
     );
-
-
   }
 }
 
@@ -86,7 +86,6 @@ class kelpHomePageState extends State<kelpHomePage> with TickerProviderStateMixi
     super.initState();
     tabController = new TabController(length: 2, vsync: this);
     animController = AnimationController(duration: Duration(milliseconds: 225),vsync: this);
-
   }
 
   @override
@@ -99,12 +98,8 @@ class kelpHomePageState extends State<kelpHomePage> with TickerProviderStateMixi
 
   @override
   Widget build(BuildContext context) {
-
-
-
     TextStyle main = Theme.of(context).textTheme.body1;
 
-    // TODO: longtap for menu, press for upload (make this a setting??)
     Widget centerFab = FloatingActionButton(
       child: AnimatedIcon(
         icon: AnimatedIcons.menu_close,
@@ -128,9 +123,7 @@ class kelpHomePageState extends State<kelpHomePage> with TickerProviderStateMixi
       animController.forward();
     } else {
       animController.reverse();
-
     }
-
 
 
     return Scaffold(
@@ -163,7 +156,6 @@ class kelpHomePageState extends State<kelpHomePage> with TickerProviderStateMixi
                     setState(() {
                       menuChildWidget = Container(height: 0,);
                     });
-
                   }
                 },
                 opacity: isMenuOpen ? 1.0 : 0.0,

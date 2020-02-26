@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
-import 'loginPage.dart';
+import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import './components/colorPickerButton.dart';
-import 'dart:developer' as developer;
+import 'loginPage.dart';
 import 'main.dart';
 
 
@@ -27,6 +27,7 @@ class _settingsPageState extends State<settingsPage> {
   Color textColor = Color(0xFFFFFFFF);
   Color accentColor = Color(0xFFFFFFFF);
 
+  TextEditingController fileLocationController;
 
 
   void _updatePrefs() async {
@@ -39,10 +40,15 @@ class _settingsPageState extends State<settingsPage> {
     prefs.setString("app_theme", theme);
     prefs.setString("file_page_layout", filePageLayout);
     prefs.setString("paste_page_layout", pastePageLayout);
+    prefs.setString("file_save_location", fileLocationController.text);
+
   }
 
   void _loadPrefs() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    //String dir = await getAppli
+
     setState(() {
       mainBg = Color(prefs.containsKey("main_bg")? prefs.getInt("main_bg") : 0xFF000000);
       tabBg = Color(prefs.containsKey("tab_bg")? prefs.getInt("tab_bg") : 0xFF111111);
@@ -54,11 +60,28 @@ class _settingsPageState extends State<settingsPage> {
       theme = prefs.containsKey("app_theme") ? prefs.getString("app_theme") : "black";
       apiKey = prefs.containsKey("api_key") ? prefs.getString("api_key") : "nil";
 
+
+      fileLocationController.text =
+      prefs.containsKey("file_save_location") ? prefs.getString(
+          "file_save_location") : "/Download/kelp/";
+
     });
 
   }
 
   bool hasBeenInitialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    fileLocationController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    fileLocationController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(context) {
@@ -332,6 +355,51 @@ class _settingsPageState extends State<settingsPage> {
                     ),
                   ),
 
+                  ListTile(
+                    title: Text(
+                      "download location:",
+                      style: main,
+                    ),
+                    trailing:
+                    Container(
+                      padding: EdgeInsets.only(
+                          left: 10, right: 10, top: 5, bottom: 5),
+                      width: 150,
+                      decoration: BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(
+                            color: Theme
+                                .of(context)
+                                .accentColor,
+                            width: 1,
+                          ),
+                        ),
+                      ),
+                      child: EditableText(
+                        controller: fileLocationController,
+                        focusNode: FocusNode(),
+                        style: Theme
+                            .of(context)
+                            .textTheme
+                            .body1,
+                        readOnly: false,
+                        cursorColor: Theme
+                            .of(context)
+                            .accentColor,
+                        backgroundCursorColor: Theme
+                            .of(context)
+                            .accentColor,
+                        paintCursorAboveText: true,
+                        autocorrect: false,
+                        obscureText: false,
+                        showSelectionHandles: true,
+                        enableInteractiveSelection: true,
+
+                      ),
+
+                    ),
+
+                  ),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.center,
