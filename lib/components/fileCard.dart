@@ -1,11 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:meme_machine/util/selectionManager.dart';
+import 'package:flutter/services.dart';
+
 
 import '../fileViewPage.dart';
 import '../util/circularRevealRoute.dart';
 import '../util/fileTypePicker.dart';
 import '../util/kelpApi.dart';
+import '../util/selectionManager.dart';
 
 class fileCard extends StatefulWidget {
 
@@ -37,8 +39,7 @@ class _fileCardState extends State<fileCard> {
 
     Widget item;
 
-    bool isSelected = widget.selectionManager.checkIfSelected(
-        this.widget.item.id);
+    bool isSelected = widget.selectionManager.checkIfSelected(this.widget.item.id);
 
 
     return LayoutBuilder(
@@ -66,7 +67,7 @@ class _fileCardState extends State<fileCard> {
                       child: Hero(
                         tag: this.widget.item.id + "_icon",
                         child: fileTypePicker.generateIcon(this.widget.item
-                            .filetype, this.widget.fg),
+                            .filetype, Theme.of(context).accentColor),
                       ),
                     ),
 
@@ -179,7 +180,7 @@ class _fileCardState extends State<fileCard> {
                         child: Hero(
                           tag: this.widget.item.id + "_icon",
                           child: fileTypePicker.generateIcon(
-                              this.widget.item.filetype, this.widget.fg),
+                              this.widget.item.filetype, Theme.of(context).accentColor),
                         ),
                       ),
 
@@ -197,8 +198,8 @@ class _fileCardState extends State<fileCard> {
         return GestureDetector(
 
           onLongPress: () {
-            if (this.widget.selectionManager.checkIfSelected(
-                this.widget.item.id) == false) {
+            if (this.widget.selectionManager.checkIfSelected(this.widget.item.id) == false) {
+              SystemChannels.platform.invokeMethod<void>('HapticFeedback.vibrate');
               this.widget.selectionManager.addToSelection(this.widget.item.id);
             } else {
               this.widget.selectionManager.removeFromSelection(

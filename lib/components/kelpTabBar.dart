@@ -21,7 +21,7 @@ class kelpTabBar extends StatefulWidget {
   final TabController controller;
   final String textLeft;
   final String textRight;
-  final FloatingActionButton centerFab;
+  final Widget centerFab;
   final Color backgroundColor;
   final Color indicatorColor;
   final Color textColor;
@@ -101,7 +101,7 @@ class kelpTabBarState extends State<kelpTabBar> {
                 color: Colors.transparent,
 
                 child: InkWell(
-                  splashColor: Theme.of(context).splashColor,
+                  splashColor: Theme.of(context).accentColor.withOpacity(0.2),
                   highlightColor: Colors.transparent,
                   onTap: () {}, // for some reason onTapDown doesn't work without onTap
                   onTapDown: (details) {

@@ -45,15 +45,30 @@ class RevealRoute extends PageRouteBuilder {
       Animation<double> secondaryAnimation,
       Widget child,
       ) {
-    return ClipPath(
-      clipper: CircularRevealClipper(
-        fraction: animation.value,
-        centerAlignment: centerAlignment,
-        centerOffset: centerOffset,
-        minRadius: minRadius,
-        maxRadius: maxRadius,
-      ),
-      child: child,
+    return Stack(
+      children: <Widget>[
+        Opacity(
+          opacity: animation.value < 1 ? animation.value : 0,
+          child: Container(
+            height: MediaQuery.of(context).size.height,
+            width: MediaQuery.of(context).size.width,
+            color: Theme.of(context).canvasColor,
+          ),
+        ),
+
+        ClipPath(
+          clipper: CircularRevealClipper(
+          fraction: animation.value,
+          centerAlignment: centerAlignment,
+          centerOffset: centerOffset,
+          minRadius: minRadius,
+          maxRadius: maxRadius,
+          ),
+          child: child,
+        ),
+      ],
     );
+
+
   }
 }

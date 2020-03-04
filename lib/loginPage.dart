@@ -33,15 +33,17 @@ class loginPageState extends State<loginPage> {
           constraints: BoxConstraints(
             maxWidth: 400
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              // look, there's no other nice looking way to do ascii art here, understand?
-              // nothing i can do about it apart from refactoring it to a seperate widget so that it's hidden away
-              // (see kelpLoadingIndicator)
-              Text(
-"""
+          child:
+          SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                // look, there's no other nice looking way to do ascii art here, understand?
+                // nothing i can do about it apart from refactoring it to a seperate widget so that it's hidden away
+                // (see kelpLoadingIndicator)
+                Text(
+                  """
       ___           ___           ___       ___     
      /\\__\\         /\\  \\         /\\__\\     /\\  \\    
     /:/  /        /::\\  \\       /:/  /    /::\\  \\   
@@ -54,16 +56,16 @@ class loginPageState extends State<loginPage> {
     |:|  |        \\:\\__\\        \\:\\__\\              
      \\|__|         \\/__/         \\/__/                            
 """,
-                style: TextStyle(
-                  color: Theme.of(context).textTheme.body1.color,
-                  letterSpacing: 1,
-                  fontFamily: 'monospace',
-                  height: 1.5,
-                  fontWeight: FontWeight.w500,
-                  fontSize: 10,
+                  style: TextStyle(
+                    color: Theme.of(context).textTheme.body1.color,
+                    letterSpacing: 1,
+                    fontFamily: 'monospace',
+                    height: 1.5,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 10,
+                  ),
                 ),
-              ),
-              Column(
+                Column(
                   children: <Widget>[
                     TextFormField(
                       controller: usernameInputController,
@@ -101,8 +103,8 @@ class loginPageState extends State<loginPage> {
                         decoration: BoxDecoration(
                           border: Border (
                             bottom: BorderSide(
-                              color: Theme.of(context).accentColor,
-                              width: 1.0
+                                color: Theme.of(context).accentColor,
+                                width: 1.0
                             ),
                           ),
                         ),
@@ -114,7 +116,7 @@ class loginPageState extends State<loginPage> {
 
                               try {
                                 await kelpApi.sendLogin(username, password);
-                              } on String catch () {
+                              } on String catch (err) {
                                 return;
                               }
 
@@ -135,8 +137,10 @@ class loginPageState extends State<loginPage> {
                     ),
                   ],
                 ),
-            ],
+              ],
+            ),
           ),
+
         )
 
       ),

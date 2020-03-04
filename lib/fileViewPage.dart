@@ -38,8 +38,9 @@ class fileViewPageState extends State<fileViewPage> {
       mainScreen = Expanded(
           child: Center(
             child: Hero(
-              tag: widget.item.id+"_icon",
-              child: fileTypePicker.generateIcon(widget.item.filetype, widget.fg),
+              tag: this.widget.item.id + "_icon",
+              child: fileTypePicker.generateIcon(widget.item
+                  .filetype, Theme.of(context).accentColor),
             ),
           )
       );
@@ -124,11 +125,11 @@ class fileViewPageState extends State<fileViewPage> {
             statusBarIconBrightness: Theme
                 .of(context)
                 .canvasColor
-                .withOpacity(0.5)
+                .withOpacity(0.7)
                 .computeLuminance() > 0.5 ? Brightness.dark : Brightness.light,
             statusBarColor: Theme
                 .of(context)
-                .canvasColor.withOpacity(0.5),
+                .canvasColor.withOpacity(0.7),
             systemNavigationBarColor: Theme
                 .of(context)
                 .primaryColor,

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -6,12 +7,16 @@ import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:http/http.dart' as http;
 import 'package:photo_view/photo_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:downloads_path_provider/downloads_path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import './fileTypePicker.dart';
 import '../components/kelpAudioPlayer.dart';
 import '../components/kelpLoadingIndicator.dart';
 import '../components/kelpVideoPlayer.dart';
+
+
 
 
 // MODELS FOR DATA REPRESENTATION
@@ -127,7 +132,7 @@ class kelpApi {
       final response = await http.get(route);
       return SingleChildScrollView(
         child: Container(
-          child: Text(response.body),
+          child: Text(response.body, textAlign: TextAlign.start,),
           padding: EdgeInsets.only(left: 5, right: 5, top: 10, bottom: 10),
         ),
       );
@@ -189,6 +194,7 @@ class kelpApi {
             }
           },
           text: response.body,
+          textAlign: TextAlign.start,
           style: Theme.of(context).textTheme.body1,
           linkStyle: TextStyle(
             color: Theme.of(context).textTheme.body1.color,
@@ -264,4 +270,69 @@ class kelpApi {
     return;
   }
 
+  static Future downloadFile(FileItem file) async {
+    PermissionStatus permission = await PermissionHandler().checkPermissionStatus(PermissionGroup.storage);
+    if (permission != PermissionStatus.granted) {
+      Map<PermissionGroup, PermissionStatus> reqPermission = await PermissionHandler().requestPermissions([PermissionGroup.storage]);
+      if (reqPermission[PermissionGroup.storage] != PermissionStatus.granted) {
+        return;
+      }
+    }
+
+    Directory downloadDir = await DownloadsPathProvider.downloadsDirectory;
+
+    File fileToDownload = File(downloadDir.path+"/kelp/"+file.filename+"."+file.filetype);
+
+    final response = await http.get(rootRoute+"/u/"+file.id+"."+file.filetype);
+
+    fileToDownload.writeAsBytes(response.bodyBytes);
+    return;
+
+  }
+
+  static Future deletePaste(String pasteId) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String api_key = prefs.getString("api_key");
+
+    var map = new Map<String, dynamic>();
+
+    map["api_key"] = api_key;
+    map["paste_id"] = pasteId;
+
+    final response = await http.post(
+        rootRoute + "/api/paste/delete", body: map);
+
+    if (response.statusCode != 200) {
+      throw Exception(
+          "Failed to delete paste (status code: ${response.statusCode})");
+    }
+
+    final jsonResponse = json.decode(response.body);
+
+    if (jsonResponse["success"] == 'false') {
+      throw Exception("Failed to get successful response");
+    }
+
+    return;
+  }
+
+  static Future downloadPaste(PasteItem paste) async {
+    PermissionStatus permission = await PermissionHandler().checkPermissionStatus(PermissionGroup.storage);
+    if (permission != PermissionStatus.granted) {
+      Map<PermissionGroup, PermissionStatus> reqPermission = await PermissionHandler().requestPermissions([PermissionGroup.storage]);
+      if (reqPermission[PermissionGroup.storage] != PermissionStatus.granted) {
+        return;
+      }
+    }
+
+    Directory downloadDir = await DownloadsPathProvider.downloadsDirectory;
+
+    File fileToDownload = File(downloadDir.path+"/kelp/"+paste.id+".txt");
+
+    final response = await http.get(rootRoute+"/p/raw/"+paste.id);
+
+    fileToDownload.writeAsString(response.body);
+    return;
+
+  }
 }

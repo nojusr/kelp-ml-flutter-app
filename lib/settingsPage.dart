@@ -7,6 +7,7 @@ import './components/colorPickerButton.dart';
 import 'loginPage.dart';
 import 'main.dart';
 
+import 'dart:developer' as developer;
 
 class settingsPage extends StatefulWidget {
   @override
@@ -40,14 +41,11 @@ class _settingsPageState extends State<settingsPage> {
     prefs.setString("app_theme", theme);
     prefs.setString("file_page_layout", filePageLayout);
     prefs.setString("paste_page_layout", pastePageLayout);
-    prefs.setString("file_save_location", fileLocationController.text);
-
   }
 
   void _loadPrefs() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    //String dir = await getAppli
 
     setState(() {
       mainBg = Color(prefs.containsKey("main_bg")? prefs.getInt("main_bg") : 0xFF000000);
@@ -59,12 +57,6 @@ class _settingsPageState extends State<settingsPage> {
       filePageLayout = prefs.containsKey("file_page_layout")? prefs.getString("file_page_layout") : "1 column";
       theme = prefs.containsKey("app_theme") ? prefs.getString("app_theme") : "black";
       apiKey = prefs.containsKey("api_key") ? prefs.getString("api_key") : "nil";
-
-
-      fileLocationController.text =
-      prefs.containsKey("file_save_location") ? prefs.getString(
-          "file_save_location") : "/Download/kelp/";
-
     });
 
   }
@@ -75,6 +67,8 @@ class _settingsPageState extends State<settingsPage> {
   void initState() {
     super.initState();
     fileLocationController = TextEditingController();
+    _loadPrefs();
+
   }
 
   @override
@@ -85,7 +79,8 @@ class _settingsPageState extends State<settingsPage> {
 
   @override
   Widget build(context) {
-    _loadPrefs();
+
+
 
 
     TextStyle main = Theme.of(context).textTheme.body1;
@@ -122,11 +117,11 @@ class _settingsPageState extends State<settingsPage> {
           statusBarIconBrightness: Theme
               .of(context)
               .canvasColor
-              .withOpacity(0.5)
+              .withOpacity(0.7)
               .computeLuminance() > 0.5 ? Brightness.dark : Brightness.light,
           statusBarColor: Theme
               .of(context)
-              .canvasColor.withOpacity(0.5),
+              .canvasColor.withOpacity(0.7 ),
           systemNavigationBarColor: Theme
               .of(context)
               .primaryColor,
@@ -350,56 +345,12 @@ class _settingsPageState extends State<settingsPage> {
                       "your api key:",
                       style: main,
                     ),
-                    trailing: Text(
+                    trailing: SelectableText(
                       this.apiKey,
+                      cursorColor: Theme.of(context).accentColor,
                     ),
                   ),
 
-                  ListTile(
-                    title: Text(
-                      "download location:",
-                      style: main,
-                    ),
-                    trailing:
-                    Container(
-                      padding: EdgeInsets.only(
-                          left: 10, right: 10, top: 5, bottom: 5),
-                      width: 150,
-                      decoration: BoxDecoration(
-                        border: Border(
-                          bottom: BorderSide(
-                            color: Theme
-                                .of(context)
-                                .accentColor,
-                            width: 1,
-                          ),
-                        ),
-                      ),
-                      child: EditableText(
-                        controller: fileLocationController,
-                        focusNode: FocusNode(),
-                        style: Theme
-                            .of(context)
-                            .textTheme
-                            .body1,
-                        readOnly: false,
-                        cursorColor: Theme
-                            .of(context)
-                            .accentColor,
-                        backgroundCursorColor: Theme
-                            .of(context)
-                            .accentColor,
-                        paintCursorAboveText: true,
-                        autocorrect: false,
-                        obscureText: false,
-                        showSelectionHandles: true,
-                        enableInteractiveSelection: true,
-
-                      ),
-
-                    ),
-
-                  ),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.center,

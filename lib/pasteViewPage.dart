@@ -77,7 +77,6 @@ class pasteViewPageState extends State<pasteViewPage> {
       );
     }
 
-
     if (hasBeenInitialized == false) {
       SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
         statusBarIconBrightness: Theme
@@ -111,11 +110,11 @@ class pasteViewPageState extends State<pasteViewPage> {
             statusBarIconBrightness: Theme
                 .of(context)
                 .canvasColor
-                .withOpacity(0.5)
+                .withOpacity(0.7)
                 .computeLuminance() > 0.5 ? Brightness.dark : Brightness.light,
             statusBarColor: Theme
                 .of(context)
-                .canvasColor.withOpacity(0.5),
+                .canvasColor.withOpacity(0.7),
             systemNavigationBarColor: Theme
                 .of(context)
                 .primaryColor,

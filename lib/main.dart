@@ -1,17 +1,22 @@
 import 'dart:developer' as developer;
 
+import 'package:flare_flutter/flare_controls.dart';
+import 'package:flare_flutter/flare_actor.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:meme_machine/components/kelpLoadingIndicator.dart';
+import 'package:flutter/services.dart';
 
+import './components/kelpLoadingIndicator.dart';
 import './components/kelpTabBar.dart';
-import './components/mainMenu.dart';
 import './util/kelpApi.dart';
 import './util/themeGenerator.dart';
+import './util/mainFabAnimController.dart';
+import 'settingsPage.dart';
 import 'filePage.dart';
 import 'loginPage.dart';
 import 'pastePage.dart';
+
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -73,64 +78,70 @@ class kelpHomePage extends StatefulWidget {
 
 class kelpHomePageState extends State<kelpHomePage> with TickerProviderStateMixin {
 
-  bool isMenuOpen = false;
+  //bool isMenuOpen = false;
   Widget menuChildWidget;
 
   TabController tabController;
 
-  AnimationController animController;
-  Animation fabAnimation;
+  //AnimationController animController;
+  mainFabAnimController _fabAnimController;
 
   @override
   void initState() {
     super.initState();
     tabController = new TabController(length: 2, vsync: this);
-    animController = AnimationController(duration: Duration(milliseconds: 225),vsync: this);
+    //animController = AnimationController(duration: Duration(milliseconds: 225),vsync: this);
+    _fabAnimController = mainFabAnimController(tabCtrl: tabController);
+
+    tabController.animation.addListener((){
+      _fabAnimController.setAnimVal(tabController.animation.value);
+    });
+
   }
 
   @override
   void dispose() {
     tabController.dispose();
-    animController.dispose();
-
     super.dispose();
   }
 
+
   @override
   Widget build(BuildContext context) {
+    developer.log("tbctrlval: "+tabController.animation.value.toString());
     TextStyle main = Theme.of(context).textTheme.body1;
+    developer.log(_fabAnimController.animVal.toString());
 
-    Widget centerFab = FloatingActionButton(
-      child: AnimatedIcon(
-        icon: AnimatedIcons.menu_close,
-        progress: animController,
-        color: Theme.of(context).textTheme.title.color,
-      ),
-      backgroundColor: Theme.of(context).backgroundColor,
-      elevation: 0,
-      onPressed: () {
-        setState(() {
-          isMenuOpen = !isMenuOpen;
-          if (isMenuOpen == true) {
-            menuChildWidget = mainMenu(bg: Theme.of(context).primaryColor, fg: main.color,);
-          }
-        });
+    Widget centerFab = GestureDetector(
+      onLongPress: () {
+        developer.log("longTap");
+        SystemChannels.platform.invokeMethod<void>('HapticFeedback.vibrate');
+        Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => settingsPage()),
+        );
       },
-
+      child: FloatingActionButton(
+        child: Container(
+          padding: EdgeInsets.all(14),
+          child: FlareActor(
+            "assets/flare/upload-to-paste.flr",
+            fit: BoxFit.contain,
+            color: Theme.of(context).accentColor,
+            controller: _fabAnimController,
+          ),
+        ),
+        backgroundColor: Theme.of(context).backgroundColor,
+        elevation: 0,
+        onPressed: () {
+          developer.log("pressed");
+        },
+      ),
     );
 
-    if (isMenuOpen) {
-      animController.forward();
-    } else {
-      animController.reverse();
-    }
-
-
     return Scaffold(
-
       body: Stack(
         children: [
-
 
           TabBarView(
             children: <Widget>[
@@ -138,31 +149,6 @@ class kelpHomePageState extends State<kelpHomePage> with TickerProviderStateMixi
               pastePage(),
             ],
             controller: tabController,
-
-          ),
-
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Container(
-              margin: EdgeInsets.only(bottom: 70),
-
-              decoration: BoxDecoration(
-
-              ),
-
-              child: AnimatedOpacity(
-                onEnd: () {
-                  if (isMenuOpen == false) {
-                    setState(() {
-                      menuChildWidget = Container(height: 0,);
-                    });
-                  }
-                },
-                opacity: isMenuOpen ? 1.0 : 0.0,
-                duration: Duration(milliseconds: 225),
-                child: menuChildWidget,
-              ),
-            ),
           ),
 
           Align(
@@ -177,7 +163,6 @@ class kelpHomePageState extends State<kelpHomePage> with TickerProviderStateMixi
               centerFab: centerFab,
             ),
           ),
-
         ],
       ),
     );

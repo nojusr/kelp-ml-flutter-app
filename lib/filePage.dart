@@ -18,15 +18,20 @@ class filePage extends StatefulWidget {
 
 class filePageState extends State<filePage> {
   Future list;
+  bool shouldShow = false;
 
   Future layout;
 
-  SelectionManager manager = new SelectionManager();
+  SelectionManager manager;
   bool isSelecting = false;
+  bool fileActionIsLoading = false;
 
   @override
   void initState() {
     super.initState();
+
+    manager = SelectionManager();
+
     manager.addListener(() {
       setState(() {
         isSelecting = manager.selectionActive;
@@ -38,23 +43,27 @@ class filePageState extends State<filePage> {
 
   @override
   void dispose() {
-    //manager.dispose();
+    manager.dispose();
     super.dispose();
+  }
+
+  void getFullFilePathFromId(String id){
+
   }
 
   @override
   Widget build(BuildContext context) {
-    developer.log("rebuildin");
 
     return FutureBuilder(
       future: list,
       builder: (context, snapshot) {
         Widget output;
 
-        bool shouldShow = false;
-
         if (snapshot.hasData) {
           shouldShow = true;
+
+          List ListData = snapshot.data;
+
           Future<Widget> layout = layoutGenerator.generateFileLayout(
               context, manager, snapshot.data);
 
@@ -64,101 +73,140 @@ class filePageState extends State<filePage> {
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 if (isSelecting) {
-                  return SafeArea(
-                    child: Stack(
+                  return Stack(
                       children: <Widget>[
-
                         snapshot.data,
-                        AnimatedContainer(
-                          height: 60,
-                          curve: Curves.easeInOut,
-                          padding: EdgeInsets.all(10),
-                          duration: Duration(milliseconds: 150),
-                          color: Theme
-                              .of(context)
-                              .canvasColor
-                              .withOpacity(0.7),
-                          child: Row(
-                            children: <Widget>[
-                              Expanded(
-                                child: Text(
-                                  "selected: " +
-                                      manager.getSelectedAmount().toString(),
+                        SafeArea(
+                          child: AnimatedContainer(
+                            height: 50,
+                            curve: Curves.easeInOut,
+                            padding: EdgeInsets.only(left: 10, right: 10),
+                            duration: Duration(milliseconds: 150),
+                            color: Theme
+                                .of(context)
+                                .canvasColor
+                                .withOpacity(0.7),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.max,
+                              children: <Widget>[
+                                Row(
+                                  children: <Widget>[
+                                    Expanded(
+                                      child: Text(
+                                        "selected: " +
+                                            manager.getSelectedAmount().toString(),
+                                      ),
+                                    ),
+
+                                    fileActionIsLoading == true
+                                      ? Align(
+                                          alignment: Alignment.center,
+                                          child: SizedBox(
+                                            width: 25,
+                                            height: 25,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                            ),
+                                          ),
+
+
+                                        )
+                                      : Container(height: 0, width: 0,),
+
+                                    Align(
+                                      alignment: Alignment.centerRight,
+                                      child: IconButton(
+                                        onPressed: () async {
+                                          //List<Future> calls;
+                                          setState(() {
+                                            fileActionIsLoading = true;
+                                          });
+                                          for (var id in manager.selectedItemKeys) {
+                                            await kelpApi.deleteFile(id);
+                                            //calls.add(tmp);
+                                          }
+                                          //await Future.wait(calls);
+                                          setState(() {
+                                            fileActionIsLoading = false;
+                                          });
+                                          manager.clearSelection();
+                                        },
+                                        color: Theme
+                                            .of(context)
+                                            .accentColor,
+                                        icon: Icon(
+                                          Icons.delete_forever,
+                                        ),
+                                      ),
+                                    ),
+
+
+                                    Align(
+                                      alignment: Alignment.centerRight,
+                                      child: IconButton(
+                                        onPressed: () async {
+                                          //List<Future> calls;
+                                          setState(() {
+                                            fileActionIsLoading = true;
+                                          });
+                                          for (var id in manager.selectedItemKeys) {
+                                            var item = ListData[ListData.indexWhere((item) => item.id == id)];
+                                            developer.log(item.id+"."+item.filetype);
+                                            await kelpApi.downloadFile(item);
+                                            //calls.add(tmp);
+                                          }
+                                          //await Future.wait(calls);
+                                          setState(() {
+                                            fileActionIsLoading = false;
+                                          });
+                                          manager.clearSelection();
+                                        },
+                                        color: Theme
+                                            .of(context)
+                                            .accentColor,
+                                        icon: Icon(
+                                          Icons.file_download,
+                                        ),
+                                      ),
+                                    ),
+
+
+                                    Align(
+                                      alignment: Alignment.centerRight,
+                                      child: IconButton(
+                                        onPressed: () {
+                                          manager.clearSelection();
+                                        },
+                                        color: Theme
+                                            .of(context)
+                                            .accentColor,
+                                        icon: Icon(
+                                          Icons.close,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ),
 
-
-                              Align(
-                                alignment: Alignment.centerRight,
-                                child: FlatButton(
-                                  onPressed: () async {
-                                    //List<Future> calls;
-                                    for (var id in manager.selectedItemKeys) {
-                                      await kelpApi.deleteFile(id);
-                                      //calls.add(tmp);
-                                    }
-                                    //await Future.wait(calls);
-                                    manager.clearSelection();
-                                  },
-                                  color: Theme
-                                      .of(context)
-                                      .cardColor,
-                                  child:
-                                  Icon(
-                                    Icons.delete_forever,
-                                  ),
-                                ),
-                              ),
-
-
-                              Align(
-                                alignment: Alignment.centerRight,
-                                child: FlatButton(
-                                  color: Theme
-                                      .of(context)
-                                      .cardColor,
-                                  child: Icon(
-                                    Icons.file_download,
-                                  ),
-                                ),
-                              ),
-
-
-                              Align(
-                                alignment: Alignment.centerRight,
-                                child: FlatButton(
-                                  onPressed: () {
-                                    manager.clearSelection();
-                                  },
-                                  color: Theme
-                                      .of(context)
-                                      .cardColor,
-                                  child: Icon(
-                                    Icons.close,
-                                  ),
-                                ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ],
-                    ),
                   );
                 } else {
-                  return SafeArea(
-                    child: Stack(
+                  return Stack(
                       children: <Widget>[
-
                         snapshot.data,
-                        AnimatedContainer(
-                          height: 10,
-                          curve: Curves.easeInOut,
-                          duration: Duration(milliseconds: 150),
-                          color: Colors.transparent,
+                        SafeArea(
+                          child: AnimatedContainer(
+                            height: 10,
+                            curve: Curves.easeInOut,
+                            duration: Duration(milliseconds: 150),
+                            color: Colors.transparent,
+                          ),
                         ),
-
                       ],
-                    ),
                   );
                 }
               } else {

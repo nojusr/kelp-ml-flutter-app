@@ -27,14 +27,14 @@ class themeGenerator {
 
         SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
           statusBarIconBrightness: Brightness.light,
-          statusBarColor: Color(0xAA000000),
+          statusBarColor: Color(0xFF000000).withOpacity(0.7),
           systemNavigationBarColor: Color(0xFF111111),
         ));
 
 
         generatedTheme = ThemeData(
           fontFamily: 'D_DIN',
-          accentColor: Colors.white,
+          accentColor: Color(0xFFFFFFFF),
           indicatorColor: Color(0xFFFFFFFF),
           canvasColor: Color(0xFF000000),
           dialogBackgroundColor: Color(0xFF111111),
@@ -42,6 +42,8 @@ class themeGenerator {
           cursorColor: Color(0xFFFFFFFF),
           cardColor: Color(0xFF0C0C0C),
           primaryColor: Color(0xFF111111),
+          textSelectionColor: Color(0xFFFFFFFF).withOpacity(0.4),
+          textSelectionHandleColor: Color(0xFFFFFFFF),
           brightness: Brightness.dark,
           dialogTheme: DialogTheme(
             shape: RoundedRectangleBorder(
@@ -55,7 +57,7 @@ class themeGenerator {
 
         SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
           statusBarIconBrightness: Brightness.dark,
-          statusBarColor: Color(0xAAFFFFFF),
+          statusBarColor: Color(0xFFFFFFFF).withOpacity(0.7),
           systemNavigationBarColor: Color(0xFFDDDDDD),
         ));
 
@@ -69,6 +71,8 @@ class themeGenerator {
           cursorColor: Color(0xFF000000),
           cardColor: Color(0xFFEEEEEE),
           primaryColor: Color(0xFFDDDDDD),
+          textSelectionColor: Color(0xFF000000).withOpacity(0.4),
+          textSelectionHandleColor: Color(0xFF000000),
           brightness: Brightness.light,
           dialogTheme: DialogTheme(
             shape: RoundedRectangleBorder(
@@ -81,8 +85,8 @@ class themeGenerator {
     } else { // user is using custom theme
 
       SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-        statusBarIconBrightness: Color(prefs.containsKey("main_bg")? prefs.getInt("main_bg") : 0xFFFFFFFF).withOpacity(0.5).computeLuminance() > 0.5 ? Brightness.dark : Brightness.light,
-        statusBarColor: Color(prefs.containsKey("main_bg")? prefs.getInt("main_bg") : 0xFFFFFFFF).withOpacity(0.5),
+        statusBarIconBrightness: Color(prefs.containsKey("main_bg")? prefs.getInt("main_bg") : 0xFFFFFFFF).withOpacity(0.7).computeLuminance() > 0.5 ? Brightness.dark : Brightness.light,
+        statusBarColor: Color(prefs.containsKey("main_bg")? prefs.getInt("main_bg") : 0xFFFFFFFF).withOpacity(0.7),
         systemNavigationBarColor: Color(prefs.containsKey("tab_bg")? prefs.getInt("tab_bg") : 0xFF111111),
       ));
 
@@ -97,6 +101,8 @@ class themeGenerator {
         cursorColor: Color(prefs.containsKey("accent_color")? prefs.getInt("accent_color") : 0xFFFFFFFF),
         cardColor: Color(prefs.containsKey("item_bg")? prefs.getInt("item_bg") : 0xFF222222),
         primaryColor: Color(prefs.containsKey("tab_bg")? prefs.getInt("tab_bg") : 0xFF111111),
+        textSelectionColor: Color(prefs.containsKey("accent_color")? prefs.getInt("accent_color") : 0xFFFFFFFF).withOpacity(0.4),
+        textSelectionHandleColor: Color(prefs.containsKey("accent_color")? prefs.getInt("accent_color") : 0xFFFFFFFF),
         brightness: Color(prefs.containsKey("main_bg")? prefs.getInt("main_bg") : 0xFFFFFFFF).computeLuminance() > 0.5 ? Brightness.light : Brightness.dark,
         dialogTheme: DialogTheme(
           shape: RoundedRectangleBorder(
