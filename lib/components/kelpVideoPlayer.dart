@@ -1,10 +1,12 @@
 import 'package:flutter/cupertino.dart';
+import 'package:meme_machine/components/fileViewMenu.dart';
 import 'package:meme_machine/components/kelpLoadingIndicator.dart';
 import 'package:video_player/video_player.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:developer' as developer;
 import 'package:async/async.dart';
+import '../util/kelpApi.dart';
 
 class KelpVideoPlayer extends StatefulWidget {
   @override
@@ -13,10 +15,11 @@ class KelpVideoPlayer extends StatefulWidget {
   const KelpVideoPlayer({
     Key key,
     this.route,
-
+    this.item,
   }):super(key:key);
 
   final String route;
+  final FileItem item;
 
 }
 
@@ -107,104 +110,113 @@ class KelpVideoPlayerState extends State<KelpVideoPlayer> with SingleTickerProvi
 
       menuChildWidget = Align(
         alignment: Alignment.bottomCenter,
-        child: Container(
-          margin: EdgeInsets.only(bottom: 20, left: 10, right: 10,),
-          child: Material(
-            borderRadius: BorderRadius.circular(10),
-            color: Theme.of(context).dialogBackgroundColor,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-
-                VideoProgressIndicator(
-                  controller,
-                  colors: VideoProgressColors(
-                      playedColor: Theme.of(context).accentColor,
-                      bufferedColor: Theme.of(context).accentColor.withOpacity(0.4),
-                    backgroundColor: Theme.of(context).accentColor.withOpacity(0.3),
-                  ),
-                  allowScrubbing: true,
-                  padding: EdgeInsets.only(top: 10, left: 10, right: 10),
-                ),
-
-                Container(
-                  padding: EdgeInsets.only(top: 5, left: 10, right: 10),
-                  child: Row(
-                    children: <Widget>[
-                      Text(current_time),
-
-                      Expanded(
-                        child: Align(
-                          alignment: Alignment.centerRight,
-                          child: Text(vid_len),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-
-
-
-                Row(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: <Widget>[
+            Container(
+              margin: EdgeInsets.only(bottom: 5, left: 10, right: 10,),
+              child: Material(
+                borderRadius: BorderRadius.circular(10),
+                color: Theme.of(context).dialogBackgroundColor,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.max,
                   children: <Widget>[
-                    IconButton(
-                      iconSize: 40,
-                      splashColor: Theme.of(context).accentColor.withOpacity(0.5),
-                      icon: Icon(
-                        Icons.skip_previous,
+
+                    VideoProgressIndicator(
+                      controller,
+                      colors: VideoProgressColors(
+                        playedColor: Theme.of(context).accentColor,
+                        bufferedColor: Theme.of(context).accentColor.withOpacity(0.4),
+                        backgroundColor: Theme.of(context).accentColor.withOpacity(0.3),
                       ),
-                      onPressed: () {
-                        menuTimer.reset();
-
-                        int currentPos = controller.value.position.inSeconds;
-                        controller.seekTo(Duration(seconds: currentPos-5));
-
-
-                      },
+                      allowScrubbing: true,
+                      padding: EdgeInsets.only(top: 10, left: 10, right: 10),
                     ),
-                    IconButton(
-                      iconSize: 50,
-                      splashColor: Theme.of(context).accentColor.withOpacity(0.5),
-                      icon: AnimatedIcon(
-                        icon: AnimatedIcons.play_pause,
-                        progress: playPauseController,
+
+                    Container(
+                      padding: EdgeInsets.only(top: 5, left: 10, right: 10),
+                      child: Row(
+                        children: <Widget>[
+                          Text(current_time),
+
+                          Expanded(
+                            child: Align(
+                              alignment: Alignment.centerRight,
+                              child: Text(vid_len),
+                            ),
+                          ),
+                        ],
                       ),
-                      onPressed: () {
-                        menuTimer.reset();
-                        if (controller.value.isPlaying == true) {
-                          playPauseController.reverse();
-                          controller.pause();
-                        } else {
-                          playPauseController.forward();
-                          controller.play();
-                        }
-                      },
                     ),
-                    IconButton(
-                      iconSize: 40,
-                      splashColor: Theme.of(context).accentColor.withOpacity(0.5),
-                      icon: Icon(
-                        Icons.skip_next,
-                      ),
-                      onPressed: () {
-                        menuTimer.reset();
 
-                        int currentPos = controller.value.position.inSeconds;
-                        controller.seekTo(Duration(seconds: currentPos+5));
 
-                      },
+
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.max,
+                      children: <Widget>[
+                        IconButton(
+                          iconSize: 40,
+                          splashColor: Theme.of(context).accentColor.withOpacity(0.5),
+                          icon: Icon(
+                            Icons.skip_previous,
+                          ),
+                          onPressed: () {
+                            menuTimer.reset();
+
+                            int currentPos = controller.value.position.inSeconds;
+                            controller.seekTo(Duration(seconds: currentPos-5));
+
+                          },
+                        ),
+                        IconButton(
+                          iconSize: 50,
+                          splashColor: Theme.of(context).accentColor.withOpacity(0.5),
+                          icon: AnimatedIcon(
+                            icon: AnimatedIcons.play_pause,
+                            progress: playPauseController,
+                          ),
+                          onPressed: () {
+                            menuTimer.reset();
+                            if (controller.value.isPlaying == true) {
+                              playPauseController.reverse();
+                              controller.pause();
+                            } else {
+                              playPauseController.forward();
+                              controller.play();
+                            }
+                          },
+                        ),
+                        IconButton(
+                          iconSize: 40,
+                          splashColor: Theme.of(context).accentColor.withOpacity(0.5),
+                          icon: Icon(
+                            Icons.skip_next,
+                          ),
+                          onPressed: () {
+                            menuTimer.reset();
+
+                            int currentPos = controller.value.position.inSeconds;
+                            controller.seekTo(Duration(seconds: currentPos+5));
+
+                          },
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
-            ),
-          ),
+              ),
 
+            ),
+
+            fileViewMenu(item: widget.item,),
+
+          ],
         ),
+
+
       );
     }
 
@@ -214,10 +226,20 @@ class KelpVideoPlayerState extends State<KelpVideoPlayer> with SingleTickerProvi
         GestureDetector(
 
           onTap: () {
-            setState(() {
-              isMenuOpen = true;
-            });
-            menuTimer.reset();
+
+            if (isMenuOpen) {
+              setState(() {
+                isMenuOpen = false;
+              });
+              menuTimer.cancel();
+            } else {
+              setState(() {
+                isMenuOpen = true;
+              });
+              menuTimer.reset();
+            }
+
+
           },
 
           child: Center(

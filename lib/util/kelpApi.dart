@@ -15,6 +15,8 @@ import './fileTypePicker.dart';
 import '../components/kelpAudioPlayer.dart';
 import '../components/kelpLoadingIndicator.dart';
 import '../components/kelpVideoPlayer.dart';
+import '../components/fileViewMenu.dart';
+import '../components/pasteViewMenu.dart';
 
 
 
@@ -95,56 +97,104 @@ class kelpApi {
 
     if (check == "null") { // if file preview isn't possible
 
-      return fileTypePicker.generateIcon(item.filetype, Theme.of(context).textTheme.body1.color);
+      return Stack(
+        children: <Widget>[
+          Center (
+            child: fileTypePicker.generateIcon(item.filetype, Theme.of(context).textTheme.body1.color),
+          ),
+          Positioned(
+            bottom: 0,
+            right: 0,
+            child: fileViewMenu(item: item,),
+          ),
+        ],
+      );
 
     } else if (check == "image") { // if the filetype is an image
 
-      return ClipRRect(
-        child: PhotoView(
-            imageProvider: NetworkImage(route),
-            backgroundDecoration: BoxDecoration(color:Theme.of(context).cardColor, ),
-            minScale: PhotoViewComputedScale.contained * 0.8,
-            maxScale: PhotoViewComputedScale.covered * 2.5,
-            loadingBuilder: (context, progress) => Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  kelpLoadingIndicator(),
-                  Container(
-                    padding: EdgeInsets.only(top: 10),
-                    height: 11,
-                    width: 80,
-                    child: LinearProgressIndicator(
-                      backgroundColor: Theme.of(context).canvasColor.withOpacity(0.7),
-                      value: progress == null
-                          ? 0
-                          : progress.cumulativeBytesLoaded / progress.expectedTotalBytes,
+      return Stack(
+        children: <Widget>[
+
+          ClipRRect(
+            child: PhotoView(
+              imageProvider: NetworkImage(route),
+              backgroundDecoration: BoxDecoration(color:Theme.of(context).cardColor, ),
+              minScale: PhotoViewComputedScale.contained * 0.8,
+              maxScale: PhotoViewComputedScale.covered * 2.5,
+              loadingBuilder: (context, progress) => Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    kelpLoadingIndicator(),
+                    Container(
+                      padding: EdgeInsets.only(top: 10),
+                      height: 11,
+                      width: 80,
+                      child: LinearProgressIndicator(
+                        backgroundColor: Theme.of(context).canvasColor.withOpacity(0.7),
+                        value: progress == null
+                            ? 0
+                            : progress.cumulativeBytesLoaded / progress.expectedTotalBytes,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-        ),
+          ),
+
+          Positioned(
+            bottom: 0,
+            right: 0,
+            child: fileViewMenu(item: item,),
+          ),
+
+        ],
       );
+
+
 
     } else if (check == "text") { // if the filetype is text
 
       final response = await http.get(route);
-      return SingleChildScrollView(
-        child: Container(
-          child: Text(response.body, textAlign: TextAlign.start,),
-          padding: EdgeInsets.only(left: 5, right: 5, top: 10, bottom: 10),
-        ),
+      return Stack(
+        children: <Widget>[
+          SingleChildScrollView(
+            child: Container(
+              child: Text(response.body, textAlign: TextAlign.start,),
+              padding: EdgeInsets.only(left: 5, right: 5, top: 10, bottom: 10),
+            ),
+          ),
+          Positioned(
+            bottom: 0,
+            right: 0,
+            child: fileViewMenu(item: item,),
+          ),
+        ],
       );
 
+
+
     } else if (check == "video"){
-      return KelpVideoPlayer(route: route,);
+      return KelpVideoPlayer(route: route, item: item ,);
     } else if (check == "audio") {
-      return KelpAudioPlayer(route: route,);
+      return KelpAudioPlayer(route: route, item: item,);
     } else {// only used if implementation for file type isn't there
-      return Center (
-        child: fileTypePicker.generateIcon(item.filetype, Theme.of(context).textTheme.body1.color),
+      return Stack(
+        children: <Widget>[
+          Center (
+            child: fileTypePicker.generateIcon(item.filetype, Theme.of(context).textTheme.body1.color),
+          ),
+          Positioned(
+            bottom: 0,
+            right: 0,
+            child: fileViewMenu(item: item,),
+          ),
+        ],
       );
+
+
+
     }
   }
 
@@ -181,31 +231,48 @@ class kelpApi {
 
     final response = await http.get(route);
 
-    return SingleChildScrollView(
+    return Container(
+      height: MediaQuery.of(context).size.height,
+      child: Stack(
+        children: <Widget>[
 
-      child: Container(
-        width: MediaQuery.of(context).size.width,
-        child: Linkify(
-          onOpen: (link) async {
-            if (await canLaunch(link.url)) {
-              await launch(link.url);
-            } else {
-              throw 'Could not launch $link';
-            }
-          },
-          text: response.body,
-          textAlign: TextAlign.start,
-          style: Theme.of(context).textTheme.body1,
-          linkStyle: TextStyle(
-            color: Theme.of(context).textTheme.body1.color,
-            decorationStyle: TextDecorationStyle.solid,
-            decorationColor: Theme.of(context).accentColor.withOpacity(0.7),
+          SingleChildScrollView(
+            padding: EdgeInsets.only(bottom: 40),
+            child: Container(
+              width: MediaQuery.of(context).size.width,
+              child: Linkify(
+                onOpen: (link) async {
+                  if (await canLaunch(link.url)) {
+                    await launch(link.url);
+                  } else {
+                    throw 'Could not launch $link';
+                  }
+                },
+                text: response.body,
+                textAlign: TextAlign.start,
+                style: Theme.of(context).textTheme.body1,
+                linkStyle: TextStyle(
+                  color: Theme.of(context).textTheme.body1.color,
+                  decorationStyle: TextDecorationStyle.solid,
+                  decorationColor: Theme.of(context).accentColor.withOpacity(0.7),
+                ),
+              ),
+
+              padding: EdgeInsets.only(left: 5, right: 5, top: 10, bottom: 10),
+            ),
           ),
-        ),
+          Positioned(
+            bottom: 0,
+            right: 0,
+            child: pasteViewMenu(item: item,),
+          ),
 
-        padding: EdgeInsets.only(left: 5, right: 5, top: 10, bottom: 10),
+
+        ],
       ),
     );
+
+
 
   }
 

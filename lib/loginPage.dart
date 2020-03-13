@@ -42,8 +42,10 @@ class loginPageState extends State<loginPage> {
                 // look, there's no other nice looking way to do ascii art here, understand?
                 // nothing i can do about it apart from refactoring it to a seperate widget so that it's hidden away
                 // (see kelpLoadingIndicator)
-                Text(
-                  """
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+"""
       ___           ___           ___       ___     
      /\\__\\         /\\  \\         /\\__\\     /\\  \\    
     /:/  /        /::\\  \\       /:/  /    /::\\  \\   
@@ -56,15 +58,17 @@ class loginPageState extends State<loginPage> {
     |:|  |        \\:\\__\\        \\:\\__\\              
      \\|__|         \\/__/         \\/__/                            
 """,
-                  style: TextStyle(
-                    color: Theme.of(context).textTheme.body1.color,
-                    letterSpacing: 1,
-                    fontFamily: 'monospace',
-                    height: 1.5,
-                    fontWeight: FontWeight.w500,
-                    fontSize: 10,
+                    style: TextStyle(
+                      color: Theme.of(context).textTheme.body1.color,
+                      letterSpacing: 1,
+                      fontFamily: 'monospace',
+                      height: 1.5,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 10,
+                    ),
                   ),
                 ),
+
                 Column(
                   children: <Widget>[
                     TextFormField(

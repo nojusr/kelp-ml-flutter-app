@@ -3,6 +3,7 @@ import 'package:flutter/rendering.dart';
 import './util/kelpApi.dart';
 import './util/fileTypePicker.dart';
 import './components/kelpLoadingIndicator.dart';
+import './components/fileViewMenu.dart';
 import 'package:flutter/services.dart';
 import 'dart:developer' as developer;
 
@@ -35,7 +36,7 @@ class fileViewPageState extends State<fileViewPage> {
     Widget mainScreen;
 
     if (fileTypePicker.checkIfPreviewPossible(widget.item.filetype) == "null") {
-      mainScreen = Expanded(
+      /*mainScreen = Expanded(
           child: Center(
             child: Hero(
               tag: this.widget.item.id + "_icon",
@@ -43,7 +44,29 @@ class fileViewPageState extends State<fileViewPage> {
                   .filetype, Theme.of(context).accentColor),
             ),
           )
+      );*/
+
+      mainScreen = Expanded(
+        child: Stack(
+          children: <Widget>[
+            Center(
+              child: Hero(
+                tag: this.widget.item.id + "_icon",
+                child: fileTypePicker.generateIcon(widget.item
+                    .filetype, Theme.of(context).accentColor),
+              ),
+            ),
+            Positioned(
+              bottom: 0,
+              right: 0,
+              child: fileViewMenu(item: widget.item,),
+            ),
+          ],
+        ),
       );
+
+
+
     } else if (isClosing == false){
       mainScreen = Expanded(
         child: FutureBuilder(

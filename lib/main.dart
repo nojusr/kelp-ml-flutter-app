@@ -127,6 +127,8 @@ class kelpHomePageState extends State<kelpHomePage> with TickerProviderStateMixi
           child: FlareActor(
             "assets/flare/upload-to-paste.flr",
             fit: BoxFit.contain,
+            //TODO: wait until flare-flutter merges antialiasing_flag to master (pr #228) and apply the setting here for better performance
+            //link: https://github.com/2d-inc/Flare-Flutter/pull/228
             color: Theme.of(context).accentColor,
             controller: _fabAnimController,
           ),
