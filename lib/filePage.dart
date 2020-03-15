@@ -47,9 +47,8 @@ class filePageState extends State<filePage> {
     super.dispose();
   }
 
-  void getFullFilePathFromId(String id){
 
-  }
+
 
   @override
   Widget build(BuildContext context) {

@@ -6,15 +6,17 @@ import 'package:share/share.dart';
 
 import '../util/kelpApi.dart';
 
-// a menu used inside pasteViewPage for the actions that can be applied to
+// a menu used inside editablePaste for the actions that can be applied to
 // a paste (download, share, edit ,delet)
 class pasteViewMenu extends StatefulWidget {
 
-  final PasteItem item;
+  PasteItem item;
+  VoidCallback onPasteEditTap;
 
-  const pasteViewMenu({
+  pasteViewMenu({
     Key key,
     @required this.item,
+    @required this.onPasteEditTap,
   }) : super(key: key);
 
   @override
@@ -22,6 +24,7 @@ class pasteViewMenu extends StatefulWidget {
 }
 
 class _pasteViewMenuState extends State<pasteViewMenu> {
+
 
   bool isLoading = false;
 
@@ -108,6 +111,26 @@ class _pasteViewMenuState extends State<pasteViewMenu> {
             ),
           ),
 
+          Container(
+            margin: EdgeInsets.only(right: 5),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Material(
+                borderRadius: BorderRadius.circular(10),
+                color: Theme.of(context).dialogBackgroundColor,
+                child: InkWell(
+                  splashColor: Theme.of(context).accentColor.withOpacity(0.5),
+                  child: Container(
+                    padding: EdgeInsets.only(top: 10, bottom: 10, left: 10, right: 10),
+                    child: Text("edit"),
+                  ),
+                  onTap: () {
+                    widget.onPasteEditTap();
+                  },
+                ),
+              ),
+            ),
+          ),
 
 
           ClipRRect(

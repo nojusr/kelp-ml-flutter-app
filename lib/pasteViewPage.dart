@@ -123,6 +123,7 @@ class pasteViewPageState extends State<pasteViewPage> {
         },
         child: Scaffold(
           backgroundColor: Theme.of(context).cardColor,
+          resizeToAvoidBottomPadding: false,
           body: SafeArea(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,

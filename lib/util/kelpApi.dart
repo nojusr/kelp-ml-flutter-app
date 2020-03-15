@@ -5,18 +5,18 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:http/http.dart' as http;
+import 'package:meme_machine/components/editablePaste.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:downloads_path_provider/downloads_path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import './fileTypePicker.dart';
 import '../components/kelpAudioPlayer.dart';
 import '../components/kelpLoadingIndicator.dart';
 import '../components/kelpVideoPlayer.dart';
 import '../components/fileViewMenu.dart';
-import '../components/pasteViewMenu.dart';
+
 
 
 
@@ -231,46 +231,8 @@ class kelpApi {
 
     final response = await http.get(route);
 
-    return Container(
-      height: MediaQuery.of(context).size.height,
-      child: Stack(
-        children: <Widget>[
 
-          SingleChildScrollView(
-            padding: EdgeInsets.only(bottom: 40),
-            child: Container(
-              width: MediaQuery.of(context).size.width,
-              child: Linkify(
-                onOpen: (link) async {
-                  if (await canLaunch(link.url)) {
-                    await launch(link.url);
-                  } else {
-                    throw 'Could not launch $link';
-                  }
-                },
-                text: response.body,
-                textAlign: TextAlign.start,
-                style: Theme.of(context).textTheme.body1,
-                linkStyle: TextStyle(
-                  color: Theme.of(context).textTheme.body1.color,
-                  decorationStyle: TextDecorationStyle.solid,
-                  decorationColor: Theme.of(context).accentColor.withOpacity(0.7),
-                ),
-              ),
-
-              padding: EdgeInsets.only(left: 5, right: 5, top: 10, bottom: 10),
-            ),
-          ),
-          Positioned(
-            bottom: 0,
-            right: 0,
-            child: pasteViewMenu(item: item,),
-          ),
-
-
-        ],
-      ),
-    );
+    return editablePaste(item: item, rawText: response.body,);
 
 
 
@@ -402,4 +364,32 @@ class kelpApi {
     return;
 
   }
+
+  static Future updatePaste(PasteItem paste, String newText) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String api_key = prefs.getString("api_key");
+
+    var map = new Map<String, dynamic>();
+
+    map["api_key"] = api_key;
+    map["paste_id"] = paste.id;
+    map["paste_name"] = paste.pastename;
+    map["u_paste"] = newText;
+
+    final response = await http.post(rootRoute+"/api/paste/update", body: map);
+
+    if (response.statusCode != 200) {
+      throw Exception(
+          "Failed to update paste (status code: ${response.statusCode})");
+    }
+
+    final jsonResponse = json.decode(response.body);
+
+    if (jsonResponse["success"] == 'false') {
+      throw Exception("Failed to get successful response");
+    }
+
+    return;
+  }
+
 }

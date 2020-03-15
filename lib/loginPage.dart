@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:meme_machine/main.dart';
-
+import 'package:flare_flutter/flare_actor.dart';
 import './util/kelpApi.dart';
 
 class loginPage extends StatefulWidget {
@@ -42,32 +42,20 @@ class loginPageState extends State<loginPage> {
                 // look, there's no other nice looking way to do ascii art here, understand?
                 // nothing i can do about it apart from refactoring it to a seperate widget so that it's hidden away
                 // (see kelpLoadingIndicator)
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(
-"""
-      ___           ___           ___       ___     
-     /\\__\\         /\\  \\         /\\__\\     /\\  \\    
-    /:/  /        /::\\  \\       /:/  /    /::\\  \\   
-   /:/__/        /:/\\:\\  \\     /:/  /    /:/\\:\\  \\  
-  /::\\__\\____   /::\\~\\:\\  \\   /:/  /    /::\\~\\:\\  \\ 
- /:/\\:::::\\__\\ /:/\\:\\ \\:\\__\\ /:/__/    /:/\\:\\ \\:\\__\\
- \\/_|:|~~|~    \\:\\~\\:\\ \\/__/ \\:\\  \\    \\/__\\:\\/:/  /
-    |:|  |      \\:\\ \\:\\__\\    \\:\\  \\        \\::/  / 
-    |:|  |       \\:\\ \\/__/     \\:\\  \\        \\/__/  
-    |:|  |        \\:\\__\\        \\:\\__\\              
-     \\|__|         \\/__/         \\/__/                            
-""",
-                    style: TextStyle(
-                      color: Theme.of(context).textTheme.body1.color,
-                      letterSpacing: 1,
-                      fontFamily: 'monospace',
-                      height: 1.5,
-                      fontWeight: FontWeight.w500,
-                      fontSize: 10,
-                    ),
+                Container(
+                  height: MediaQuery.of(context).size.height/5,
+                  width: MediaQuery.of(context).size.width,
+                  child: FlareActor(
+                    "assets/flare/main_logo.flr",
+                    fit: BoxFit.contain,
+                    color: Theme.of(context).textTheme.bodyText1.color,
                   ),
                 ),
+
+
+
+
+
 
                 Column(
                   children: <Widget>[
