@@ -48,7 +48,7 @@ class loginPageState extends State<loginPage> {
                   child: FlareActor(
                     "assets/flare/main_logo.flr",
                     fit: BoxFit.contain,
-                    color: Theme.of(context).textTheme.bodyText1.color,
+                    color: Theme.of(context).textTheme.body1.color,
                   ),
                 ),
 
