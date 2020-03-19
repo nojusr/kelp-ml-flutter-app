@@ -33,6 +33,10 @@ dependencies:
   permission_handler: any
   flare_flutter: any
   share: any
+  receive_sharing_intent: any
+  file_picker: any
+  mime_type: any
+  fluttertoast: any
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -56,6 +60,7 @@ flutter:
 
   assets:
     - assets/flare/
+    - assets/icons/
 
   fonts:
     - family: D_DIN
