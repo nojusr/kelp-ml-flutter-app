@@ -1,10 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:meme_machine/main.dart';
+import 'package:provider/provider.dart';
 import '../pasteViewPage.dart';
 import '../util/kelpApi.dart';
 import '../util/circularRevealRoute.dart';
 import '../util/selectionManager.dart';
+import '../main.dart';
 
 class pasteCard extends StatefulWidget {
 
@@ -34,6 +37,8 @@ class _pasteCardState extends State<pasteCard> {
     Widget item;
 
     bool isSelected = widget.selectionManager.checkIfSelected(this.widget.item.id);
+
+    final pp = Provider.of<pageProvider>(context);
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -165,9 +170,14 @@ class _pasteCardState extends State<pasteCard> {
                 context,
                 RevealRoute(
                   transitionDuration: Duration(milliseconds: 300),
-                  page: pasteViewPage(
-                    item: this.widget.item,
+                  page: ChangeNotifierProvider.value(
+                      value: pp,
+                      child: pasteViewPage(
+                        item: this.widget.item,
+                      ),
                   ),
+
+
                   maxRadius: 1200,
                   centerOffset: details.globalPosition,
                 ),
@@ -177,22 +187,7 @@ class _pasteCardState extends State<pasteCard> {
           child: item,
         );
 
-        return GestureDetector(
-          onTapUp: (TapUpDetails details) {
-            Navigator.push(
-              context,
-              RevealRoute(
-                transitionDuration: Duration(milliseconds: 300),
-                page: pasteViewPage(
-                  item: this.widget.item,
-                ),
-                maxRadius: 1200,
-                centerOffset: details.globalPosition,
-              ),
-            );
-          },
-          child: item,
-        );
+
 
       },
     );

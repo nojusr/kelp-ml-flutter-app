@@ -4,6 +4,7 @@ import './util/kelpApi.dart';
 import './util/fileTypePicker.dart';
 import './components/kelpLoadingIndicator.dart';
 import './components/fileViewMenu.dart';
+import 'filePage.dart';
 import 'package:flutter/services.dart';
 import 'dart:developer' as developer;
 
@@ -137,7 +138,6 @@ class fileViewPageState extends State<fileViewPage> {
     return
       WillPopScope(
         onWillPop: () async {
-          developer.log("POPPIN");
           setState(() {
             isClosing = true;
             //shouldShow = false;

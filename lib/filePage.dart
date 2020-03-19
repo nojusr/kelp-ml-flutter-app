@@ -3,16 +3,20 @@ import 'dart:developer' as developer;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:provider/provider.dart';
 
 import './components/kelpLoadingIndicator.dart';
 import './util/kelpApi.dart';
 import './util/layoutGenerator.dart';
 import './util/selectionManager.dart';
+import 'main.dart';
 
 class filePage extends StatefulWidget {
 
+  final filePageState state =  filePageState();
+
   @override
-  filePageState createState() => filePageState();
+  filePageState createState() => state;
 }
 
 
@@ -35,11 +39,20 @@ class filePageState extends State<filePage> {
     manager.addListener(() {
       setState(() {
         isSelecting = manager.selectionActive;
+        shouldShow = false;
         list = kelpApi.fetchFileList();
       });
     });
     list = kelpApi.fetchFileList();
   }
+
+  void reloadList() {
+    setState(() {
+      shouldShow = false;
+      list = kelpApi.fetchFileList();
+    });
+  }
+
 
   @override
   void dispose() {
@@ -52,6 +65,7 @@ class filePageState extends State<filePage> {
 
   @override
   Widget build(BuildContext context) {
+
 
     return FutureBuilder(
       future: list,

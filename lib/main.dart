@@ -1,14 +1,21 @@
 import 'dart:developer' as developer;
 
-import 'package:flare_flutter/flare_controls.dart';
+
+import 'package:receive_sharing_intent/receive_sharing_intent.dart';
+import 'package:provider/provider.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flare_flutter/flare_actor.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'dart:io';
+import 'dart:async';
+
 
 import './components/kelpLoadingIndicator.dart';
 import './components/kelpTabBar.dart';
+import './util/defaultToast.dart';
 import './util/kelpApi.dart';
 import './util/themeGenerator.dart';
 import './util/mainFabAnimController.dart';
@@ -16,6 +23,7 @@ import 'settingsPage.dart';
 import 'filePage.dart';
 import 'loginPage.dart';
 import 'pastePage.dart';
+import 'pasteCreatePage.dart';
 
 
 void main() {
@@ -29,41 +37,55 @@ class rootApp extends StatelessWidget {
   Widget build(BuildContext context) {
     themeGenerator themeGen = themeGenerator();
 
-    developer.log("returning FutureBuilder in rootApp");
     return FutureBuilder(
       future: themeGen.generateThemeData(context),
       builder: (context, snapshot) {
-        ThemeData mainThemeData = snapshot.data;
 
-        Future loginChk = kelpApi.checkIfLoggedIn();
-        return FutureBuilder(
-          future: loginChk,
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              if (snapshot.data == true) {
-                return MaterialApp(
-                  title: 'kelp\'s place',
-                  theme: mainThemeData,
-                  home: kelpHomePage(),
-                );
+        ThemeData mainThemeData = snapshot.data;
+        if (snapshot.hasData) {
+          Future loginChk = kelpApi.checkIfLoggedIn();
+          return FutureBuilder(
+            future: loginChk,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                if (snapshot.data == true) {
+                  return MaterialApp(
+                    title: 'kelp\'s place',
+                    theme: mainThemeData,
+                    home: ChangeNotifierProvider<pageProvider>(
+                      create: (_) => pageProvider(),
+                      child: kelpHomePage(),
+                    ),
+
+                  );
+                } else {
+                  return MaterialApp(
+                    title: 'kelp\'s place',
+                    theme: mainThemeData,
+                    home: loginPage(),
+                  );
+                }
               } else {
                 return MaterialApp(
                   title: 'kelp\'s place',
                   theme: mainThemeData,
-                  home: loginPage(),
+                  home: Scaffold(
+                    body: Center(child: kelpLoadingIndicator(),),
+                  ),
                 );
               }
-            } else {
-              return MaterialApp(
-                title: 'kelp\'s place',
-                theme: mainThemeData,
-                home: Scaffold(
-                  body: Center(child: kelpLoadingIndicator(),),
-                ),
-              );
-            }
-          },
-        );
+            },
+
+          );
+        } else {
+          return MaterialApp(
+            title: 'kelp\'s place',
+            theme: mainThemeData,
+            home: Scaffold(
+              body: Center(child: kelpLoadingIndicator(),),
+            ),
+          );
+        }
       },
     );
   }
@@ -76,6 +98,23 @@ class kelpHomePage extends StatefulWidget {
   kelpHomePageState createState() => kelpHomePageState();
 }
 
+class pageProvider with ChangeNotifier {
+  pageProvider();
+
+  filePage _filepage = filePage();
+  pastePage _pastepage = pastePage();
+
+  void reloadFilePage () {
+    _filepage.state.reloadList();
+    notifyListeners();
+  }
+
+  void reloadPastePage () {
+    _pastepage.state.reloadList();
+    notifyListeners();
+  }
+}
+
 class kelpHomePageState extends State<kelpHomePage> with TickerProviderStateMixin {
 
   //bool isMenuOpen = false;
@@ -85,6 +124,12 @@ class kelpHomePageState extends State<kelpHomePage> with TickerProviderStateMixi
 
   //AnimationController animController;
   mainFabAnimController _fabAnimController;
+
+  // shared intent stuff
+  StreamSubscription _intentDataStreamSubscription;
+  List<SharedMediaFile> _sharedFiles;
+  //String _sharedText;
+
 
   @override
   void initState() {
@@ -97,20 +142,80 @@ class kelpHomePageState extends State<kelpHomePage> with TickerProviderStateMixi
       _fabAnimController.setAnimVal(tabController.animation.value);
     });
 
+    // For sharing images coming from outside the app while the app is in the memory
+    _intentDataStreamSubscription =
+        ReceiveSharingIntent.getMediaStream().listen((List<SharedMediaFile> value) {
+          if (value.first.path == null) {
+            return;
+          }
+          defaultToast.send("uploading file...");
+          File f = File(value.first.path);
+          kelpApi.uploadFile(f);
+          defaultToast.send("done");
+          return;
+        }, onError: (err) {
+          defaultToast.send("failed to upload file");
+          return;
+        });
+
+    // For sharing images coming from outside the app while the app is closed
+    ReceiveSharingIntent.getInitialMedia().then((List<SharedMediaFile> value) {
+      if (value.first.path == null) {
+        return;
+      }
+      defaultToast.send("uploading file...");
+      File f = File(value.first.path);
+      kelpApi.uploadFile(f);
+      defaultToast.send("done");
+
+    });
+
+    // For sharing or opening urls/text coming from outside the app while the app is in the memory
+    _intentDataStreamSubscription =
+        ReceiveSharingIntent.getTextStream().listen((String value) {
+          if (value == null) {
+            return;
+          }
+          defaultToast.send("uploading paste...");
+          kelpApi.createPaste("Shared paste", value);
+          defaultToast.send("done");
+          return;
+        }, onError: (err) {
+          defaultToast.send("failed to upload paste");
+          return;
+        });
+
+    // For sharing or opening urls/text coming from outside the app while the app is closed
+    ReceiveSharingIntent.getInitialText().then((String value) {// TEST IF THIS WORKS WHILE LOGGED OUT
+      if (value == null) {
+        return;
+      }
+      defaultToast.send("uploading paste...");
+      kelpApi.createPaste("Shared paste", value);
+      defaultToast.send("done");
+      return;
+    });
+
+
   }
 
   @override
   void dispose() {
+    _intentDataStreamSubscription.cancel();
     tabController.dispose();
     super.dispose();
   }
 
 
+
+
   @override
   Widget build(BuildContext context) {
-    developer.log("tbctrlval: "+tabController.animation.value.toString());
+
     TextStyle main = Theme.of(context).textTheme.body1;
-    developer.log(_fabAnimController.animVal.toString());
+
+
+    final pp = Provider.of<pageProvider>(context);
 
     Widget centerFab = GestureDetector(
       onLongPress: () {
@@ -135,38 +240,53 @@ class kelpHomePageState extends State<kelpHomePage> with TickerProviderStateMixi
         ),
         backgroundColor: Theme.of(context).backgroundColor,
         elevation: 0,
-        onPressed: () {
-          developer.log("pressed");
+        onPressed: () async {
+          if (tabController.index == 0) {
+            //uploadFile
+            File fileToUpload = await FilePicker.getFile();
+            await kelpApi.uploadFile(fileToUpload);
+            pp._filepage.state.reloadList();
+          } else if (tabController.index == 1) {
+            // uploadPaste
+            await Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => pasteCreatePage()),
+            );
+            pp._pastepage.state.reloadList();
+          }
         },
       ),
     );
 
     return Scaffold(
-      body: Stack(
-        children: [
+      body: SafeArea(
+        child: Stack(
+          children: [
 
-          TabBarView(
-            children: <Widget>[
-              filePage(),
-              pastePage(),
-            ],
-            controller: tabController,
-          ),
-
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: kelpTabBar(
+            TabBarView(
+              children: <Widget>[
+                pp._filepage,
+                pp._pastepage,
+              ],
               controller: tabController,
-              textRight: "pastes",
-              textLeft: "files",
-              backgroundColor: Theme.of(context).primaryColor,
-              indicatorColor: Theme.of(context).indicatorColor,
-              textColor: main.color,
-              centerFab: centerFab,
             ),
-          ),
-        ],
+
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: kelpTabBar(
+                controller: tabController,
+                textRight: "pastes",
+                textLeft: "files",
+                backgroundColor: Theme.of(context).primaryColor,
+                indicatorColor: Theme.of(context).indicatorColor,
+                textColor: main.color,
+                centerFab: centerFab,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
+

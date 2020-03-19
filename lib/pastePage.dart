@@ -10,16 +10,17 @@ import './util/selectionManager.dart';
 import 'dart:developer' as developer;
 
 class pastePage extends StatefulWidget {
+  final pastePageState state =  pastePageState();
 
   @override
-  pastePageState createState() => pastePageState();
+  pastePageState createState() => state;
 }
 
 
 
 class pastePageState extends State<pastePage> {
   Future list;
-
+  bool shouldShow = false;
   Future layout;
 
   SelectionManager manager;
@@ -35,12 +36,20 @@ class pastePageState extends State<pastePage> {
     manager.addListener(() {
       setState(() {
         isSelecting = manager.selectionActive;
+        shouldShow = false;
         list = kelpApi.fetchPasteList();
       });
     });
 
     list = kelpApi.fetchPasteList();
 
+  }
+
+  void reloadList() {
+    setState(() {
+      shouldShow = false;
+      list = kelpApi.fetchPasteList();
+    });
   }
 
   @override
@@ -50,7 +59,7 @@ class pastePageState extends State<pastePage> {
       builder: (context, snapshot) {
         Widget output;
 
-        bool shouldShow = false;
+
 
         if (snapshot.hasData) {
 

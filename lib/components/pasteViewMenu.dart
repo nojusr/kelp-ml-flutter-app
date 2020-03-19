@@ -3,8 +3,10 @@ import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:share/share.dart';
+import 'package:provider/provider.dart';
 
 import '../util/kelpApi.dart';
+import '../main.dart';
 
 // a menu used inside editablePaste for the actions that can be applied to
 // a paste (download, share, edit ,delet)
@@ -33,6 +35,8 @@ class _pasteViewMenuState extends State<pasteViewMenu> {
   Widget build (context) {
 
     Widget LoadingIcon;
+
+    final pp = Provider.of<pageProvider>(context);
 
     if (isLoading) {
       LoadingIcon = Container(
@@ -151,9 +155,12 @@ class _pasteViewMenuState extends State<pasteViewMenu> {
 
                   await kelpApi.deletePaste(widget.item.id);
 
+
                   setState(() {
                     isLoading = false;
                   });
+
+                  pp.reloadPastePage();
                   Navigator.pop(context);
                 },
               ),

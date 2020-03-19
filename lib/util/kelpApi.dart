@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:developer' as developer;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -157,21 +158,26 @@ class kelpApi {
     } else if (check == "text") { // if the filetype is text
 
       final response = await http.get(route);
-      return Stack(
-        children: <Widget>[
-          SingleChildScrollView(
-            child: Container(
-              child: Text(response.body, textAlign: TextAlign.start,),
-              padding: EdgeInsets.only(left: 5, right: 5, top: 10, bottom: 10),
+      return Container(
+        height: MediaQuery.of(context).size.height,
+        child: Stack(
+
+          children: <Widget>[
+            SingleChildScrollView(
+              child: Container(
+                child: Text(response.body, textAlign: TextAlign.start,),
+                padding: EdgeInsets.only(left: 5, right: 5, top: 10, bottom: 10),
+              ),
             ),
-          ),
-          Positioned(
-            bottom: 0,
-            right: 0,
-            child: fileViewMenu(item: item,),
-          ),
-        ],
+            Positioned(
+              bottom: 0,
+              right: 0,
+              child: fileViewMenu(item: item,),
+            ),
+          ],
+        ),
       );
+
 
 
 
@@ -319,6 +325,60 @@ class kelpApi {
 
   }
 
+  static Future uploadFile(File fileToUpload) async {
+    PermissionStatus permission = await PermissionHandler().checkPermissionStatus(PermissionGroup.storage);
+    if (permission != PermissionStatus.granted) {
+      Map<PermissionGroup, PermissionStatus> reqPermission = await PermissionHandler().requestPermissions([PermissionGroup.storage]);
+      if (reqPermission[PermissionGroup.storage] != PermissionStatus.granted) {
+        return;
+      }
+    }
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String api_key = prefs.getString("api_key");
+
+    var map = new Map<String, String>();
+
+    map["api_key"] = api_key;
+    //map["u_file"] = base64Encode(fileToUpload.readAsBytesSync());
+
+    /*final response = await http.post(
+        rootRoute + "/api/upload", body: map);
+
+
+*/
+//        mime(fileToUpload.path),
+    var request = http.MultipartRequest('POST', Uri.parse(rootRoute+"/api/upload"));
+    request.fields.addAll(map);
+    request.files.add(
+      http.MultipartFile(
+        'u_file',
+        fileToUpload.readAsBytes().asStream(),
+        fileToUpload.lengthSync(),
+        filename: fileToUpload.path.split("/").last
+      ),
+    );
+
+    var response = await request.send();
+
+    if (response.statusCode != 200) {
+      throw Exception(
+          "Failed to upload file (status code: ${response.statusCode})");
+    }
+
+    //final jsonResponse = json.decode(response.body);
+
+    //if (jsonResponse["success"] == 'false') {
+    //  throw Exception("Failed to get successful response, reason:"+jsonResponse["reason"]);
+    //}
+
+    //developer.log(jsonResponse["success"]);
+
+
+    return;
+
+  }
+
   static Future deletePaste(String pasteId) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String api_key = prefs.getString("api_key");
@@ -381,6 +441,32 @@ class kelpApi {
     if (response.statusCode != 200) {
       throw Exception(
           "Failed to update paste (status code: ${response.statusCode})");
+    }
+
+    final jsonResponse = json.decode(response.body);
+
+    if (jsonResponse["success"] == 'false') {
+      throw Exception("Failed to get successful response");
+    }
+
+    return;
+  }
+
+  static Future createPaste(String pasteName, String pasteContent) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String api_key = prefs.getString("api_key");
+
+    var map = new Map<String, dynamic>();
+
+    map["api_key"] = api_key;
+    map["paste_name"] = pasteName;
+    map["u_paste"] = pasteContent;
+
+    final response = await http.post(rootRoute+"/api/paste", body: map);
+
+    if (response.statusCode != 200) {
+      throw Exception(
+          "Failed to create paste (status code: ${response.statusCode})");
     }
 
     final jsonResponse = json.decode(response.body);

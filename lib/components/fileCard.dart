@@ -1,13 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
+import 'package:provider/provider.dart';
 
 import '../fileViewPage.dart';
 import '../util/circularRevealRoute.dart';
 import '../util/fileTypePicker.dart';
 import '../util/kelpApi.dart';
 import '../util/selectionManager.dart';
+import '../main.dart';
 
 class fileCard extends StatefulWidget {
 
@@ -41,6 +42,7 @@ class _fileCardState extends State<fileCard> {
 
     bool isSelected = widget.selectionManager.checkIfSelected(this.widget.item.id);
 
+    final pp = Provider.of<pageProvider>(context);
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -224,10 +226,15 @@ class _fileCardState extends State<fileCard> {
                 context,
                 RevealRoute(
                   transitionDuration: Duration(milliseconds: 300),
-                  page: fileViewPage(
-                    item: this.widget.item,
-                    fg: this.widget.fg,
+                  page: ChangeNotifierProvider.value(
+                      value: pp,
+                      child: fileViewPage(
+                        item: this.widget.item,
+                      ),
                   ),
+
+
+
                   maxRadius: 1200,
                   centerOffset: details.globalPosition,
                 ),

@@ -2,9 +2,13 @@ import 'dart:developer' as developer;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:meme_machine/main.dart';
 import 'package:share/share.dart';
+import 'package:provider/provider.dart';
 
+import '../filePage.dart';
 import '../util/kelpApi.dart';
+import '../main.dart';
 
 // a menu used inside fileViewPage for the actions that can be applied to
 // a file (download, share, delet)
@@ -30,6 +34,8 @@ class _fileViewMenuState extends State<fileViewMenu> {
   Widget build (context) {
 
     Widget LoadingIcon;
+
+    final pp = Provider.of<pageProvider>(context);
 
     if (isLoading) {
       LoadingIcon = Container(
@@ -132,6 +138,7 @@ class _fileViewMenuState extends State<fileViewMenu> {
                     isLoading = false;
                   });
                   Navigator.pop(context);
+                  pp.reloadFilePage();
                 },
               ),
             ),
